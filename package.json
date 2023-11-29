@@ -1,0 +1,15 @@
+{
+  "name": "Madness",
+  "version": "0.1",
+  "description": "",
+  "main": "System_start.js",
+  "scripts": {
+    "dev": "node start.js"
+  },
+  "author": "Uximy",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/voice": "^0.16.1",
+    "discord.js": "^14.14.1"
+  }
+}
