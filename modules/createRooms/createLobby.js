@@ -95,6 +95,16 @@ function checkNameChannel(oldstate, lobbyConfig) {
 client.on(Events.VoiceStateUpdate, async (oldstate, newstate) => {
     for (let i = 0; i < lobbyConfig.Rooms.length; i++) {
         if (newstate.channel && newstate.channel.id == lobbyConfig.Rooms[i].id) {
+
+            //Удаляем канал пользователя когда он с своего канала переходит в лобби каналы
+            if (oldstate.channel && oldstate.channel.parentId == config.parenId) {
+                if (newstate.channel.id == lobbyConfig.Rooms[i].id && oldstate.channel.members.size == 0) {
+                    oldstate.channel.delete();
+                }
+            }
+
+            /*Создаём канал пользователю когда он заходит в каналы лобби 
+            и выставляем слот на канал в зависимости от того в какой лобби зашёл пользователь*/
             guild.channels.create({
                 name: lobbyConfig.Rooms[i].standartName,
                 type: ChannelType.GuildVoice,
@@ -110,17 +120,17 @@ client.on(Events.VoiceStateUpdate, async (oldstate, newstate) => {
                     }
                 ]
             }).then((channel) => {
-                setTimeout(() => {
-                    newstate.member.voice.setChannel(channel.id);
-                }, 3000);
+                //Переносим пользователя в созданный канал
+                newstate.member.voice.setChannel(channel.id);
             });
             return 0;
         }
     }
 
+    //Удаляем созданный канал пользователем когда он выходит из самого канала
     if (oldstate.channel && oldstate.channel.parentId == config.parenId) {
         if (oldstate.channel.members.size == 0) {
-            console.log(oldstate.channel.name);
+            const oldchannel = oldstate.channel;
             if (checkNameChannel(oldstate, lobbyConfig)) {
                 oldstate.channel.delete();
             }
