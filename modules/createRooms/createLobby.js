@@ -1,7 +1,7 @@
 const { client, checkRole, Rewriting } = require("../../start.js");
 let config = require('../../Config/config.json');
 let lobbyConfig = require('../createRooms/config.json');
-const {ActionRowBuilder, SlashCommandBuilder, ChannelType, Events, PermissionsBitField } = require("discord.js");
+const {ActionRowBuilder, SlashCommandBuilder, ChannelType, Events, PermissionsBitField, EmbedBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const guild = client.guilds.cache.get(config.Guild_id);
 
 /* Создать бота у которого будет команда createlobby (команда для создания первоначальных каналов) будут параметры: название канала, сколько слотов
@@ -30,7 +30,25 @@ const createRoom = new SlashCommandBuilder()
     )
     .setDefaultMemberPermissions(8);
 
-    client.application.commands.create(createRoom, config.Guild_id)
+    client.application.commands.create(createRoom, config.Guild_id);
+
+
+    function ButtonsSettingsRoom()
+    {
+        const editName = new ButtonBuilder()
+            .setCustomId("editname")
+            .setStyle(ButtonStyle.Danger)
+            .setEmoji("✏")
+
+        const permissionsChannel = new ButtonBuilder()
+            .setCustomId("permissionschannel")
+            .setStyle(ButtonStyle.Danger)
+            .setEmoji("🔑")
+
+
+    
+        return [editName, permissionsChannel];
+    }
 
 client.on(Events.InteractionCreate, async (i) => {
     if (!i.isCommand()) return;
@@ -75,6 +93,38 @@ function CreateRooms(namelobby, countMember, standartName) {
             }
         );
         Rewriting('./modules/createRooms/config.json', lobbyConfig);
+        if (!guild.channels.cache.filter(channel => channel.name === "🛠║управление-каналом").size) {
+            guild.channels.create({
+                name: "🛠️║управление-каналом",
+                type: ChannelType.GuildText,
+                permissionOverwrites: [
+                    {
+                        id: guild.roles.everyone,
+                        deny: [
+                            PermissionsBitField['Flags'].ViewChannel,
+                            PermissionsBitField['Flags'].SendMessages,
+                            PermissionsBitField['Flags'].SendMessagesInThreads,
+                            PermissionsBitField['Flags'].SendTTSMessages
+                        ]
+                    }
+                ],
+                parent: config.parenId,
+                position: 0
+            }).then(channel => {
+                const settingsMessage = new EmbedBuilder()
+                    .setColor('#FA747D')
+                    .setTitle("Управление каналом") 
+                    .setAuthor({name: client.user.displayName, url: "https://discord.gg/phBaXpBhkq", iconURL: client.user.displayAvatarURL()})
+                    .setDescription(`описание кнопок`)
+
+                    let buttons = ButtonsSettingsRoom();
+
+                    channel.send({embeds: [settingsMessage], components: [new ActionRowBuilder().addComponents(...buttons)]});
+            })
+            .catch(err => {
+                console.log(err);
+            })
+        }
     })
     .catch((error) => {
         console.log(error);
@@ -137,7 +187,3 @@ client.on(Events.VoiceStateUpdate, async (oldstate, newstate) => {
         }
     }
 });
-
-
-
-
