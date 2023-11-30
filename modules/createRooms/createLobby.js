@@ -37,17 +37,20 @@ const createRoom = new SlashCommandBuilder()
     {
         const editName = new ButtonBuilder()
             .setCustomId("editname")
-            .setStyle(ButtonStyle.Danger)
-            .setEmoji("✏")
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("📝")
 
         const permissionsChannel = new ButtonBuilder()
             .setCustomId("permissionschannel")
-            .setStyle(ButtonStyle.Danger)
-            .setEmoji("🔑")
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("🔒")
 
+        const editSlot = new ButtonBuilder()
+            .setCustomId("editslot")
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("👥")
 
-    
-        return [editName, permissionsChannel];
+        return [editName, editSlot, permissionsChannel];
     }
 
 client.on(Events.InteractionCreate, async (i) => {
@@ -187,3 +190,5 @@ client.on(Events.VoiceStateUpdate, async (oldstate, newstate) => {
         }
     }
 });
+
+//Управление комнатой
