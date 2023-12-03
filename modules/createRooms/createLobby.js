@@ -33,25 +33,25 @@ const createRoom = new SlashCommandBuilder()
     client.application.commands.create(createRoom, config.Guild_id);
 
 
-    function ButtonsSettingsRoom()
-    {
-        const editName = new ButtonBuilder()
-            .setCustomId("editname")
-            .setStyle(ButtonStyle.Secondary)
-            .setEmoji("📝")
+    // function ButtonsSettingsRoom()
+    // {
+    //     const editName = new ButtonBuilder()
+    //         .setCustomId("editname")
+    //         .setStyle(ButtonStyle.Secondary)
+    //         .setEmoji("📝")
 
-        const permissionsChannel = new ButtonBuilder()
-            .setCustomId("permissionschannel")
-            .setStyle(ButtonStyle.Secondary)
-            .setEmoji("🔒")
+    //     const permissionsChannel = new ButtonBuilder()
+    //         .setCustomId("permissionschannel")
+    //         .setStyle(ButtonStyle.Secondary)
+    //         .setEmoji("🔒")
 
-        const editSlot = new ButtonBuilder()
-            .setCustomId("editslot")
-            .setStyle(ButtonStyle.Secondary)
-            .setEmoji("👥")
+    //     const editSlot = new ButtonBuilder()
+    //         .setCustomId("editslot")
+    //         .setStyle(ButtonStyle.Secondary)
+    //         .setEmoji("👥")
 
-        return [editName, editSlot, permissionsChannel];
-    }
+    //     return [editName, editSlot, permissionsChannel];
+    // }
 
 client.on(Events.InteractionCreate, async (i) => {
     if (!i.isCommand()) return;
@@ -114,6 +114,9 @@ function CreateRooms(namelobby, countMember, standartName) {
                 parent: config.parenId,
                 position: 0
             }).then(channel => {
+                lobbyConfig.id_settingsRooms = channel.id;
+                Rewriting('./modules/createRooms/config.json', lobbyConfig);
+
                 const settingsMessage = new EmbedBuilder()
                     .setColor('#FA747D')
                     .setTitle("Управление каналом") 
@@ -192,3 +195,19 @@ client.on(Events.VoiceStateUpdate, async (oldstate, newstate) => {
 });
 
 //Управление комнатой
+// const filter = async (i) => 
+//     i.customId === 'createticket' ||
+//     i.customId === 'closeticket';
+
+
+// const collector = guild.channels.cache.find(channel => channel.name === "🛠║управление-каналом").createMessageComponentCollector({filter})
+        
+// collector.on('collect', async i => {
+//     if (i.customId === 'createticket') {
+//         if (i.member.roles.cache.some(role => role.name === 'Muted')) {
+//             i.reply({content: `У вас присутствует роль ${guild.roles.cache.find(muted => muted.name === "Muted").toString()}, вы не можете создавать тикеты.`, ephemeral: true});
+//         }else{
+//             createTicket(guild, i);
+//         }
+//     }
+// });

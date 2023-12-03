@@ -2,6 +2,11 @@ const fs = require('fs');
 const { Client, Events, GatewayIntentBits, ActivityType, ChannelType, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates] });
 let config = require('./Config/config.json');
+let configLobby = require('./modules/createRooms/config.json');
+const filter = async (i) => 
+    i.customId === 'editname' ||
+    i.customId === 'permissionschannel' ||
+    i.customId === 'editslot';
 
 var connectModules = function (dir = './modules', files_){
     files_ = files_ || [];
@@ -29,6 +34,8 @@ client.on('ready', () => {
         name: `Madness Project | version ${require('./package.json').version}`,
         type: ActivityType.Custom
     }], status: 'dnd' });
+
+    const guild = client.guilds.cache.get(config.Guild_id);
 
     function ButtonsSettingsRoom()
     {
@@ -67,7 +74,24 @@ client.on('ready', () => {
 
         let buttons = ButtonsSettingsRoom();
 
-    client.guilds.cache.get(config.Guild_id).channels.cache.get("1179502154017419335").send({embeds: [settingsMessage], components: [new ActionRowBuilder().addComponents(...buttons)]});
+    guild.channels.cache.get(lobby.id_settingsRooms).send({embeds: [settingsMessage], components: [new ActionRowBuilder().addComponents(...buttons)]});
+
+
+    const collector = guild.channels.cache.get(configLobby.id_settingsRooms).createMessageComponentCollector({filter});
+            
+    collector.on('collect', async i => {
+        if (i.customId === 'editname') {
+            
+        }
+
+        if (i.customId === 'permissionschannel') {
+            
+        }
+
+        if (i.customId === 'editslot') {
+            
+        }
+    });
 });
 
 function Rewriting(path, newJson)
