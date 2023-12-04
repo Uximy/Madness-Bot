@@ -9,7 +9,13 @@
 			"name": "lobby 3x3",
 			"id": "1179114354055057448",
 			"standartName": "для троих"
+		},
+		{
+			"name": "test",
+			"id": "1181207477388312597",
+			"standartName": "3"
 		}
 	],
-	"id_settingsRooms": "1179502154017419335"
+	"id_settingsRooms": "1181207479821017118",
+	"lastMessages": "1181207481553268756"
 }

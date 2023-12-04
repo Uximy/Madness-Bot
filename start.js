@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { Client, Events, GatewayIntentBits, ActivityType, ChannelType, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
+const { Client, Events, GatewayIntentBits, ActivityType, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates] });
 let config = require('./Config/config.json');
 let configLobby = require('./modules/createRooms/config.json');
@@ -27,7 +27,7 @@ var connectModules = function (dir = './modules', files_){
     return modules;
 };
 
-client.on('ready', () => {
+client.on(Events.ClientReady, () => {
     console.log(`Bot logged in as ${client.user.tag}!`);
     connectModules();
     client.user.setPresence({ activities: [{ 
@@ -37,61 +37,71 @@ client.on('ready', () => {
 
     const guild = client.guilds.cache.get(config.Guild_id);
 
-    function ButtonsSettingsRoom()
-    {
-        const editName = new ButtonBuilder()
-            .setCustomId("editname")
-            .setStyle(ButtonStyle.Secondary)
-            .setEmoji("📝")
-
-        const permissionsChannel = new ButtonBuilder()
-            .setCustomId("permissionschannel")
-            .setStyle(ButtonStyle.Secondary)
-            .setEmoji("🔒")
-
-        const editSlot = new ButtonBuilder()
-            .setCustomId("editslot")
-            .setStyle(ButtonStyle.Secondary)
-            .setEmoji("👥")
-
-        return [editName, editSlot, permissionsChannel];
-    }
-
-    const settingsMessage = new EmbedBuilder()
-        .setColor("#2E8BC0")
-        .setTitle("⚙️ Управление каналом")
-        .setDescription(`
-            Измените конфигурацию вашей комнаты с помощью панели управления.
-
-            📝 — Изменить название комнаты
-
-            👥 — Задать новый лимит участников
-
-            🔒 — Ограничить/Выдать доступ к комнате
+    if (guild.channels.cache.get(configLobby.id_settingsRooms)) {
+        //Изменние название канала
         
-        `)
-        .setTimestamp()
-
-        let buttons = ButtonsSettingsRoom();
-
-    guild.channels.cache.get(lobby.id_settingsRooms).send({embeds: [settingsMessage], components: [new ActionRowBuilder().addComponents(...buttons)]});
-
-
-    const collector = guild.channels.cache.get(configLobby.id_settingsRooms).createMessageComponentCollector({filter});
+        const collector = guild.channels.cache.get(configLobby.id_settingsRooms).createMessageComponentCollector({filter});
             
-    collector.on('collect', async i => {
-        if (i.customId === 'editname') {
-            
-        }
+        collector.on('collect', async i => {
+            if (i.customId === 'editname') {
+                if(i.member.voice.channel){
+                    if (guild.channels.cache.get(i.member.voice.channelId).permissionOverwrites.cache.get(i.member.id)) {
 
-        if (i.customId === 'permissionschannel') {
-            
-        }
+                        const inputeditname = new TextInputBuilder()
+                            .setCustomId(`inputeditname`)
+                            .setLabel(`Название канала`)
+                            .setPlaceholder(`Введите название канала`)
+                            .setStyle(TextInputStyle.Short)
+                            .setRequired(true)
 
-        if (i.customId === 'editslot') {
-            
-        }
-    });
+                        const modal = new ModalBuilder()
+                            .setCustomId('modaleditname')
+                            .setTitle('Изменить название канала')
+                            .setComponents(
+                                new ActionRowBuilder().addComponents(inputeditname)
+                            )
+
+                        await i.showModal(modal);
+
+                        const submitted = await i.awaitModalSubmit({
+                            time: 60000,
+                            filter: interaction => interaction.user.id === i.user.id,
+                        }).catch(error => {
+                            console.error(error)
+                            return null;
+                        })
+                        
+                        if (submitted) {
+                            const newName = submitted.fields.getTextInputValue("inputeditname");
+                            
+                            guild.channels.cache.get(i.member.voice.channelId).edit({
+                                name: newName
+                            })
+                            .then(() => {
+                                submitted.reply({content: "Название канала изменилось", ephemeral: true});
+                            })
+                            .catch(err => {
+                                console.log(err);
+                                submitted.reply({content: "Возникла ошибка", ephemeral: true});
+                            })
+                        }
+                    }else{
+                        await i.reply({content: 'У вас нету прав поменять название канал, вы не владелец канала!', ephemeral: true});
+                    }
+                }else{
+                    await i.reply({content: 'Зайдите в свой созданный канал чтобы использовать данную функцию', ephemeral: true});
+                }
+            }
+        
+            if (i.customId === 'permissionschannel') {
+                
+            }
+        
+            if (i.customId === 'editslot') {
+                
+            }
+        });
+    }
 });
 
 function Rewriting(path, newJson)
